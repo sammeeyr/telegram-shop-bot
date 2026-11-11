@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: commerce
+      POSTGRES_USER: commerce_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-migrator_dev_only}
+      COMMERCE_RUNTIME_PASSWORD: ${COMMERCE_RUNTIME_PASSWORD:-runtime_dev_only}
+    ports:
+      - "5432:5432"
+    volumes:
+      - commerce-postgres:/var/lib/postgresql/data
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U commerce_migrator -d commerce"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      APP_ENV: development
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-CHANGE_ME_generate_a_random_secret_at_least_32_chars}
+      MIGRATION_DATABASE_URL: postgresql+asyncpg://commerce_migrator:${POSTGRES_PASSWORD:-migrator_dev_only}@postgres:5432/commerce
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: .
+    command: ["uvicorn", "commerce_api.asgi:app", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+    environment:
+      APP_ENV: development
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-CHANGE_ME_generate_a_random_secret_at_least_32_chars}
+      DIGITAL_ASSET_ENCRYPTION_KEY: ${DIGITAL_ASSET_ENCRYPTION_KEY:-}
+      COMMERCE_DATABASE_URL: postgresql+asyncpg://commerce_runtime:${COMMERCE_RUNTIME_PASSWORD:-runtime_dev_only}@postgres:5432/commerce
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////app/data/shop.db
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  commerce-postgres:

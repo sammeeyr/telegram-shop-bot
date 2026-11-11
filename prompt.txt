@@ -1,0 +1,24 @@
+Repository and engineering documentation
+Before implementation, establish these project-level files:
+
+docs/
+├── ARCHITECTURE.md
+├── DATABASE_SCHEMA.md
+├── ERD.md
+├── API_SPECIFICATION.md
+├── TENANT_ISOLATION.md
+├── SECURITY_MODEL.md
+├── PAYMENT_INTEGRATIONS.md
+├── INVENTORY_ENGINE.md
+├── ORDER_LIFECYCLE.md
+├── DISPATCH_ENGINE.md
+├── AI_AGENT_SPECIFICATION.md
+├── TEST_STRATEGY.md
+├── DEPLOYMENT_GUIDE.md
+└── ROADMAP.md
+
+project/
+├── SPRINT_TRACKER.md
+├── DECISIONS.md
+├── KNOWN_ISSUES.md
+└── RELEASE_CHECKLIST.md
