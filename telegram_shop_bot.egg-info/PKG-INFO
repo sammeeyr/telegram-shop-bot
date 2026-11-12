@@ -6,6 +6,7 @@ Requires-Python: >=3.11
 Requires-Dist: aiogram<4,>=3.13
 Requires-Dist: alembic<2,>=1.13
 Requires-Dist: asyncpg<1,>=0.29
+Requires-Dist: cryptography<47,>=43
 Requires-Dist: email-validator<3,>=2.2
 Requires-Dist: fastapi<1,>=0.115
 Requires-Dist: httpx<1,>=0.27
